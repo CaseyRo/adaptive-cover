@@ -86,6 +86,32 @@ async def test_options_reload_applies_new_value(hass):
     assert coordinator.options["azimuth"] == 90
 
 
+async def test_options_map_pins_set_azimuth(hass):
+    set_sun(hass, 180, 40)
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        title="Living room",
+        options={"covers": [COVER], "azimuth": 0},
+    )
+    entry.add_to_hass(hass)
+    await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    # A pin inside the room and one due south of it → azimuth 180.
+    window = {
+        "covers": [COVER],
+        "inside_point": {"latitude": 52.0, "longitude": 5.0},
+        "window_point": {"latitude": 51.99, "longitude": 5.0},
+    }
+    result2 = await hass.config_entries.options.async_configure(
+        result["flow_id"], _options_input(window)
+    )
+    assert result2["type"] == FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert entry.options["azimuth"] == 180
+
+
 async def test_defaults_produce_working_behaviour(hass):
     set_sun(hass, 180, 50)
     entry = MockConfigEntry(

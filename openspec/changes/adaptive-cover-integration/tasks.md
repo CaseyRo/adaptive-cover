@@ -48,7 +48,7 @@
 - [x] 7.2 Implement `config_flow.py`: single-field `async_step_user` (name) + `OptionsFlowWithReload` with sections Window · Geometry · Sun · Sky · Movement · Manual override
 - [x] 7.3 Write `strings.json` + `translations/en.json` with section/field labels and the approximate, plain-language help texts
 - [x] 7.4 Window-azimuth helper: 16-point compass selector mapping to degrees (default path)
-- [ ] 7.5 Exact azimuth helper — *PARTIAL: numeric azimuth shipped; the "map pin + heading dial" needs a custom frontend element (stock config-flow selectors can't render a heading dial, and `LocationSelector` returns lat/lon only). Deferred to v1.x as a frontend card; flagged to user*
+- [x] 7.5 Exact azimuth helper — **two-pin map helper** (inside-room pin + outside-window pin → true-north `bearing()`), since a literal heading *dial* isn't a stock selector. `LocationSelector`-based, no custom frontend; precedence map > compass > number. Verified: `bearing()` cardinals + an options-flow test that resolves two pins to azimuth 180. (`geometry.bearing`, `config_flow._flatten`)
 - [x] 7.6 Tests written (`tests/test_config_flow.py`): create-from-name, options defaults + facing→azimuth, options reload applies, defaults produce working behaviour — syntax-clean; PHACC execution tracked under 8.5
 
 ## 8. Docs, attribution & release

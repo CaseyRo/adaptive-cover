@@ -26,14 +26,14 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 - **Two live sky-threshold number entities** (`shade_above`, `open_below`).
 - **Config + options flow** — single-field create step, sectioned
   `OptionsFlowWithReload`, help text from a single source, and a 16-point
-  compass selector for window azimuth.
+  compass selector for window azimuth, plus a two-pin map helper (a pin inside
+  the room + one outside the window → true-north bearing) for an exact azimuth.
 
 ### Known limitations / planned
 - Vertical/simple covers only (no tilt or awning).
 - Covers without `set_position` are detected and surfaced as a repair issue;
   open/close-only support is planned for a later release.
-- The exact "map pin + heading dial" azimuth helper needs a custom frontend
-  element (stock config-flow selectors can't render a heading dial); the v1
-  surface is numeric azimuth + the 16-point compass.
+- A literal heading *dial* for azimuth isn't a stock config-flow selector, so
+  the map helper uses two pins (bearing) rather than a single pin + dial.
 
 [Unreleased]: https://github.com/CaseyRo/adaptive-cover

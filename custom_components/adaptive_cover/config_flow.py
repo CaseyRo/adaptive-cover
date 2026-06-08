@@ -4,10 +4,11 @@ Mirrors the adaptive_lighting shape: a single-field create step (name), then a
 sectioned options flow that reloads the entry on save. The field set, defaults
 and help text come from ``const.py`` so there is one source of truth.
 
-Window azimuth: a numeric field plus a 16-point compass select for the
-zero-friction default. (The "map pin + heading dial" exact helper from the
-design needs a custom frontend element — stock selectors can't render a heading
-dial — so it is deferred; numeric + compass is the v1 surface.)
+Window azimuth has three ways in, easiest first: a 16-point compass select, a
+numeric field, and an optional two-pin map helper (a pin inside the room + one
+outside through the window → true-north bearing). A literal heading *dial* isn't
+a stock config-flow selector, so two map pins replace the originally-imagined
+"pin + dial" as the map-based exact helper. Precedence: map pins > compass > number.
 """
 
 from __future__ import annotations
@@ -27,6 +28,8 @@ from homeassistant.data_entry_flow import section
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
+    LocationSelector,
+    LocationSelectorConfig,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
@@ -62,9 +65,12 @@ from .const import (
     DOMAIN,
     SECTIONS,
 )
+from .geometry import bearing
 
 CONF_FACING = "facing"
 FACING_CUSTOM = "custom"
+CONF_INSIDE_POINT = "inside_point"
+CONF_WINDOW_POINT = "window_point"
 
 # 16-point compass → degrees (true north).
 COMPASS: dict[str, int] = {
@@ -148,6 +154,14 @@ def _window_section(options: dict):
             )
         ),
         _marker(CONF_AZIMUTH, options): _selector(CONF_AZIMUTH),
+        # Optional "exact" map helper: a pin inside the room + one outside
+        # through the window resolve to a true-north azimuth (overrides above).
+        vol.Optional(CONF_INSIDE_POINT): LocationSelector(
+            LocationSelectorConfig(radius=False)
+        ),
+        vol.Optional(CONF_WINDOW_POINT): LocationSelector(
+            LocationSelectorConfig(radius=False)
+        ),
     }
     return section(vol.Schema(inner), {"collapsed": False})
 
@@ -163,14 +177,34 @@ def _options_schema(options: dict) -> vol.Schema:
     return vol.Schema(schema)
 
 
+def _has_latlon(point: Any) -> bool:
+    return isinstance(point, dict) and "latitude" in point and "longitude" in point
+
+
 def _flatten(user_input: dict[str, Any]) -> dict[str, Any]:
-    """Collapse the sectioned form into flat options and resolve facing."""
+    """Collapse the sectioned form into flat options and resolve the azimuth.
+
+    Azimuth precedence: two map pins (bearing) > compass facing > the numeric
+    field. The helper inputs (facing, map pins) are ephemeral — only the
+    resolved azimuth is stored.
+    """
     flat: dict[str, Any] = {}
     for value in user_input.values():
         if isinstance(value, dict):
             flat.update(value)
+    inside = flat.pop(CONF_INSIDE_POINT, None)
+    outside = flat.pop(CONF_WINDOW_POINT, None)
     facing = flat.pop(CONF_FACING, FACING_CUSTOM)
-    if facing != FACING_CUSTOM and facing in COMPASS:
+    if _has_latlon(inside) and _has_latlon(outside):
+        flat[CONF_AZIMUTH] = round(
+            bearing(
+                inside["latitude"],
+                inside["longitude"],
+                outside["latitude"],
+                outside["longitude"],
+            )
+        )
+    elif facing != FACING_CUSTOM and facing in COMPASS:
         flat[CONF_AZIMUTH] = COMPASS[facing]
     for key in ENTITY_OPTIONAL:
         flat.setdefault(key, "")

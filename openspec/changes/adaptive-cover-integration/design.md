@@ -134,7 +134,7 @@ Greenfield — no migration. Rollout: (1) scaffold harness from `adaptive_lighti
 
 ## Resolved Decisions (from Q&A)
 
-- **Q1 → "one pin + heading dial".** Default stays the 16-point compass. The exact helper drops one map pin on the window (`LocationSelector`) plus a heading dial/degree input — not the two-point bearing. (See D11.)
+- **Q1 → "one pin + heading dial" *(revised during implementation)*.** Default stays the 16-point compass. The pin+dial was chosen in Q&A, but implementation found Home Assistant has **no stock heading-dial selector** and `LocationSelector` returns lat/lon only — a dial would need a custom frontend element. So the exact helper shipped as the **two-pin map bearing** instead (a pin inside the room + one outside the window → true-north `bearing()`), which *is* fully native and arguably simpler UX (no dial to fiddle). This is the originally-considered Q1 option B, now the implementation. (See D11.)
 - **Q2 → only the two sky thresholds become `number` entities** (`shade_above`, `open_below`). Everything else stays options-flow-only, preserving ~2–3 entities per window. Glare distance and manual timeout are *not* live numbers in v1.
 - **Q3 → defer open/close-only covers to v1.x.** v1 requires position-capable covers (`set_position`); open/close-only covers are detected via `supported_features` and surfaced as a clear repair issue rather than silently mishandled (R4). No two-state fallback in v1.
 - **Q4 → unit-agnostic brightness slot.** The brightness sensor slot accepts any illuminance/irradiance sensor; thresholds are set in that sensor's own scale (lux or W/m² — both "higher = brighter"). No `device_class` interpretation. The separate weather/cloud slot retains its inverted handling (higher cloud = open more).

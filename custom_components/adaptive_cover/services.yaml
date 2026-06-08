@@ -1,0 +1,15 @@
+reset_manual_control:
+  name: Reset manual control
+  description: Resume automatic control for a window's covers.
+  target:
+    entity:
+      integration: adaptive_cover
+      domain: switch
+
+apply_now:
+  name: Apply now
+  description: Re-apply the recommended position to a window's covers immediately.
+  target:
+    entity:
+      integration: adaptive_cover
+      domain: switch

@@ -1,0 +1,27 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtualenvs / tooling
+.venv/
+.python-version
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
+# Home Assistant dev instance (keep only the curated config)
+config/*
+!config/configuration.yaml
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,150 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a window",
+        "description": "Name this window. You can set the cover and the direction it faces next.",
+        "data": {
+          "name": "Name"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Adaptive Cover",
+        "description": "Pick the cover and the direction the window faces. Everything else has a sensible default.",
+        "sections": {
+          "window": {
+            "name": "Window",
+            "data": {
+              "covers": "Cover(s)",
+              "facing": "Facing direction (compass)",
+              "azimuth": "Window azimuth (°)"
+            },
+            "data_description": {
+              "covers": "The cover(s) this window controls. Multiple covers move together.",
+              "facing": "Pick the nearest compass point, or choose Custom to type the azimuth.",
+              "azimuth": "Which way the glass faces (0=N, 90=E, 180=S, 270=W). An approximation is fine."
+            }
+          },
+          "geometry": {
+            "name": "Geometry",
+            "data": {
+              "window_height": "Window height (m)",
+              "glare_distance": "Glare distance (m)"
+            },
+            "data_description": {
+              "window_height": "Roughly how high the top of the glass is above the floor. Eyeball it.",
+              "glare_distance": "How far across the floor direct sun may reach before shading. Smaller = darker/cooler; larger = more sun and view."
+            }
+          },
+          "sun": {
+            "name": "Sun",
+            "data": {
+              "fov_left": "Field of view — left (°)",
+              "fov_right": "Field of view — right (°)",
+              "min_elevation": "Minimum sun elevation (°)",
+              "position_after_sunset": "Position after sunset",
+              "min_position": "Minimum position",
+              "max_position": "Maximum position"
+            },
+            "data_description": {
+              "fov_left": "Degrees to the left of centre the window still sees the sun.",
+              "fov_right": "Degrees to the right of centre the window still sees the sun.",
+              "min_elevation": "Ignore the sun below this elevation.",
+              "position_after_sunset": "Where to leave the cover once the sun is down.",
+              "min_position": "Never close past this position.",
+              "max_position": "Never open past this position."
+            }
+          },
+          "sky": {
+            "name": "Sky",
+            "data": {
+              "brightness_sensor": "Outdoor brightness sensor",
+              "weather_entity": "Weather entity (cloud fallback)",
+              "shade_above": "Shade above",
+              "open_below": "Open below",
+              "indoor_lux_sensor": "Indoor light sensor (governor)",
+              "indoor_lux_cap": "Indoor brightness cap"
+            },
+            "data_description": {
+              "brightness_sensor": "Optional outdoor light/irradiance sensor (lux or W/m²). Preferred over cloud cover.",
+              "weather_entity": "Optional; its cloud-cover % is used only when no brightness sensor is set.",
+              "shade_above": "Shade when clearness rises to/above this (sensor's own scale, or clearness%=100-cloud).",
+              "open_below": "Open back up below this. Keep it under 'shade above' — the gap is an anti-flap dead-band.",
+              "indoor_lux_sensor": "Optional room sensor used as a gentle comfort governor. Empty = disabled.",
+              "indoor_lux_cap": "Room brightness above which to trim more closed (0 = off)."
+            }
+          },
+          "movement": {
+            "name": "Movement (anti-hum)",
+            "data": {
+              "interval": "Update interval (s)",
+              "quantize_step": "Quantize step (%)",
+              "min_delta": "Minimum move (%)",
+              "cooldown": "Cooldown (s)"
+            },
+            "data_description": {
+              "interval": "How often to recompute and (if enabled) move.",
+              "quantize_step": "Snap target positions to this step.",
+              "min_delta": "Don't move for changes smaller than this.",
+              "cooldown": "Minimum time between commanded moves."
+            }
+          },
+          "manual": {
+            "name": "Manual override",
+            "data": {
+              "manual_tolerance": "Manual tolerance (%)",
+              "manual_timeout": "Manual timeout (s)"
+            },
+            "data_description": {
+              "manual_tolerance": "How far a settled cover may differ from our last command before it counts as a manual move.",
+              "manual_timeout": "Resume automatic control this long after a manual move (also resets at sunrise)."
+            }
+          }
+        }
+      }
+    }
+  },
+  "selector": {
+    "facing": {
+      "options": {
+        "N": "North",
+        "NNE": "North-northeast",
+        "NE": "Northeast",
+        "ENE": "East-northeast",
+        "E": "East",
+        "ESE": "East-southeast",
+        "SE": "Southeast",
+        "SSE": "South-southeast",
+        "S": "South",
+        "SSW": "South-southwest",
+        "SW": "Southwest",
+        "WSW": "West-southwest",
+        "W": "West",
+        "WNW": "West-northwest",
+        "NW": "Northwest",
+        "NNW": "North-northwest",
+        "custom": "Custom (use azimuth below)"
+      }
+    }
+  },
+  "services": {
+    "reset_manual_control": {
+      "name": "Reset manual control",
+      "description": "Resume automatic control for a window's covers."
+    },
+    "apply_now": {
+      "name": "Apply now",
+      "description": "Re-apply the recommended position immediately."
+    }
+  },
+  "issues": {
+    "no_set_position": {
+      "title": "Cover does not support set position",
+      "description": "The cover {cover} cannot be set to a specific position, so Adaptive Cover can't drive it. Open/close-only covers are planned for a later release."
+    }
+  }
+}

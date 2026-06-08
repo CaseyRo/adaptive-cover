@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "adaptive-cover"
+version = "0.1.0"
+description = "Sun-tracking (adaptive) covers for Home Assistant — simple, explainable, WAF-safe"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pre-commit",
+    "ruff",
+]
+test = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "pytest-homeassistant-custom-component",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["custom_components/adaptive_cover"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

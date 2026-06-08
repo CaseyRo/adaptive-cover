@@ -1,0 +1,12 @@
+{
+  "domain": "adaptive_cover",
+  "name": "Adaptive Cover (CDiT)",
+  "codeowners": ["@CaseyRo"],
+  "config_flow": true,
+  "after_dependencies": ["cover", "sun"],
+  "documentation": "https://github.com/CaseyRo/adaptive-cover#readme",
+  "homeassistant": "2025.1.0",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/CaseyRo/adaptive-cover/issues",
+  "version": "0.1.0"
+}

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Self-contained dev setup: a uv venv with dev + test dependency groups and
+# pre-commit hooks installed. No upstream HA-core clone needed (unlike the
+# adaptive_lighting harness, which clones core for upstream merges — we don't).
+set -ex
+
+cd "$(dirname "$0")/.."
+
+pip install uv
+
+uv venv --python 3.13
+uv sync --group dev --group test
+
+uv run pre-commit install-hooks || true

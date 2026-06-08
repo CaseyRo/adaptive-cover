@@ -1,0 +1,43 @@
+# Dev Home Assistant instance for Adaptive Cover (CDiT).
+# https://www.home-assistant.io/integrations/default_config/
+default_config:
+
+# https://www.home-assistant.io/integrations/logger/
+logger:
+  default: info
+  logs:
+    custom_components.adaptive_cover: debug
+
+# A position-capable dummy blind so set_cover_position works while developing.
+input_number:
+  dummy_cover_pos:
+    name: Dummy Cover Position
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+
+cover:
+  - platform: template
+    covers:
+      dummy_blind:
+        friendly_name: "Dummy Blind"
+        position_template: "{{ states('input_number.dummy_cover_pos') | int(0) }}"
+        open_cover:
+          action: input_number.set_value
+          target:
+            entity_id: input_number.dummy_cover_pos
+          data:
+            value: 100
+        close_cover:
+          action: input_number.set_value
+          target:
+            entity_id: input_number.dummy_cover_pos
+          data:
+            value: 0
+        set_cover_position:
+          action: input_number.set_value
+          target:
+            entity_id: input_number.dummy_cover_pos
+          data:
+            value: "{{ position }}"

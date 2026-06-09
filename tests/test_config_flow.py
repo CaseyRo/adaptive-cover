@@ -21,7 +21,7 @@ def _options_input(window: dict) -> dict:
     }
 
 
-async def test_user_step_creates_entry_from_name(hass):
+async def test_create_step_yields_working_entry(hass):
     set_sun(hass, 180, 40)
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
@@ -29,12 +29,24 @@ async def test_user_step_creates_entry_from_name(hass):
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
 
+    # Name + cover + facing + fine-tune in one go → a working window.
     result2 = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"name": "Kitchen"}
+        result["flow_id"],
+        {"name": "Kitchen", "covers": [COVER], "facing": "S", "finetune": 8},
     )
     assert result2["type"] == FlowResultType.CREATE_ENTRY
     assert result2["title"] == "Kitchen"
     await hass.async_block_till_done()
+
+    entry = hass.config_entries.async_entries(DOMAIN)[0]
+    assert entry.data["covers"] == [COVER]
+    assert entry.data["azimuth"] == 188  # South (180) + fine-tune (+8)
+
+    # The create-time data must reach the engine via the defaults/data/options merge.
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    assert coordinator.options["covers"] == [COVER]
+    assert coordinator.options["azimuth"] == 188
+    assert coordinator.data is not None
 
 
 async def test_options_fill_defaults_and_facing_maps_to_azimuth(hass):
@@ -86,7 +98,7 @@ async def test_options_reload_applies_new_value(hass):
     assert coordinator.options["azimuth"] == 90
 
 
-async def test_options_map_pins_set_azimuth(hass):
+async def test_options_finetune_offsets_compass(hass):
     set_sun(hass, 180, 40)
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -98,18 +110,14 @@ async def test_options_map_pins_set_azimuth(hass):
     await hass.async_block_till_done()
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
-    # A pin inside the room and one due south of it → azimuth 180.
-    window = {
-        "covers": [COVER],
-        "inside_point": {"latitude": 52.0, "longitude": 5.0},
-        "window_point": {"latitude": 51.99, "longitude": 5.0},
-    }
+    # South with a -10° nudge → 170.
     result2 = await hass.config_entries.options.async_configure(
-        result["flow_id"], _options_input(window)
+        result["flow_id"],
+        _options_input({"covers": [COVER], "facing": "S", "finetune": -10}),
     )
     assert result2["type"] == FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert entry.options["azimuth"] == 180
+    assert entry.options["azimuth"] == 170
 
 
 async def test_defaults_produce_working_behaviour(hass):

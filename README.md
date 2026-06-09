@@ -43,10 +43,8 @@ It is **not** a drop-in replacement for [`basbruss/adaptive-cover`](https://gith
 ## Quick start
 
 1. **Install via HACS** (custom repository) → restart Home Assistant.
-2. **Settings → Devices & Services → Add Integration → Adaptive Cover.** Give the window a name. That's the whole first step.
-3. **Open the new entry's options:**
-   - **Window** — pick your cover entity(s), and set **which way the window faces** (a 16-point compass, or the map helper — point at the way the glass looks).
-   - Everything else (height, glare distance, brightness thresholds, movement, override) already has a good default. Open the sections only if you want to tune.
+2. **Settings → Devices & Services → Add Integration → Adaptive Cover.** Fill the short form: a name, the cover(s), and **which way the window faces** — pick the nearest of 16 compass points, then nudge ±20° if it sits between them. That's a working window.
+3. **Tune later if you want (optional).** Open the entry's **Configure** for the rest — height, glare distance, brightness thresholds, movement, override — all with sane defaults until you touch them.
 4. **Check the preview.** The window's sensor shows *"direct sun enters ~09:40–13:20 today"* — if that looks wrong (e.g. "no direct sun expected" for your sunny south window), your azimuth is off. Fix it now, no waiting for the afternoon.
 5. **Flip the master switch on** when you're happy. Watch the reason sensor for a day before you forget it exists.
 
@@ -54,7 +52,7 @@ It is **not** a drop-in replacement for [`basbruss/adaptive-cover`](https://gith
 
 **"How cloudy is too cloudy?"** — 60% bugs you, 80% bugs your neighbour. So we don't make you guess in a setup box: the brightness thresholds are **live slider entities** you nudge on an annoying day while watching the blind react, and there's a **dead-band** so a single drifting cloud can't make the blind flap up and down. Better still, give it an **outdoor light sensor** and the question becomes "is it actually bright?" instead of "what's the forecast."
 
-**"Which way does my window face?"** — the one fiddly input. Use the **map helper**: see your roof from above, click the direction the window looks, done — true north, no compass calibration, works on your laptop. Or just pick the nearest of 16 compass points; it's an approximation, not a survey.
+**"Which way does my window face?"** — the one input that needs a human. Just **pick the nearest of 16 compass points and nudge ±20°** — South, then +8° if it leans a bit west. It's an approximation, not a survey, and the *"sun enters ~HH:MM"* preview tells you immediately if you got the direction wrong. (No fiddly maps, no phone-compass calibration.)
 
 ## Entities (per window)
 

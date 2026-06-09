@@ -3,9 +3,17 @@
     "step": {
       "user": {
         "title": "Add a window",
-        "description": "Name this window. You can set the cover and the direction it faces next.",
+        "description": "Name the window, pick its cover(s), and tell it which way the glass faces. Everything else has a sensible default you can tweak later.",
         "data": {
-          "name": "Name"
+          "name": "Name",
+          "covers": "Cover(s)",
+          "facing": "Facing direction",
+          "finetune": "Fine-tune (°)"
+        },
+        "data_description": {
+          "covers": "The cover(s) this window controls. Multiple covers move together.",
+          "facing": "The nearest compass point the glass faces.",
+          "finetune": "Optional nudge (±20°) if the window sits between compass points."
         }
       }
     }
@@ -21,16 +29,14 @@
             "data": {
               "covers": "Cover(s)",
               "facing": "Facing direction (compass)",
-              "azimuth": "Window azimuth (°)",
-              "inside_point": "Map helper — point inside the room",
-              "window_point": "Map helper — point outside the window"
+              "finetune": "Fine-tune (°)",
+              "azimuth": "Window azimuth (°) — advanced"
             },
             "data_description": {
               "covers": "The cover(s) this window controls. Multiple covers move together.",
-              "facing": "Pick the nearest compass point, or choose Custom to type the azimuth.",
-              "azimuth": "Which way the glass faces (0=N, 90=E, 180=S, 270=W). An approximation is fine.",
-              "inside_point": "Optional exact helper: drop a pin where you sit/stand in the room.",
-              "window_point": "Drop a second pin just outside the window. The bearing between them sets the azimuth (true north) and overrides the compass/number above."
+              "facing": "Pick the nearest compass point, or choose Custom to use the numeric azimuth below.",
+              "finetune": "Nudge the compass direction by ±20°. Ignored when facing is Custom.",
+              "azimuth": "Exact azimuth in degrees (0=N, 90=E, 180=S, 270=W). Used only when facing is Custom."
             }
           },
           "geometry": {

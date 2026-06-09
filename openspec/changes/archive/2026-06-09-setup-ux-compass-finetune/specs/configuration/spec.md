@@ -1,10 +1,4 @@
-# Configuration
-
-## Purpose
-
-Provide a low-friction setup: a guided create step that collects the essentials (name, cover, facing) for a working window, sane defaults so only window azimuth needs human judgement, a sectioned options flow with live reload, and a compass + fine-tune helper for setting window azimuth.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Minimal create step, full options flow
 
@@ -17,26 +11,6 @@ The config flow's create step SHALL collect the essentials needed for a working 
 #### Scenario: Advanced settings remain optional
 - **WHEN** the user has completed the create step
 - **THEN** all remaining settings SHALL be editable later via the options flow and SHALL use sane defaults until changed
-
-### Requirement: One meaningful input, defaults for the rest
-
-Beyond the cover entity selection, the only configuration value that SHALL require human judgement is the window azimuth. Window height, glare distance, field of view, minimum elevation, sky thresholds, movement policy, and manual-override timeout SHALL all have sane defaults that produce reasonable behaviour unconfigured.
-
-#### Scenario: Defaults produce working behaviour
-- **WHEN** the user configures only the cover entity and window azimuth and leaves all advanced sections at defaults
-- **THEN** the integration SHALL adapt the cover using default geometry and policy values without further input
-
-### Requirement: Sectioned options flow with live reload
-
-The options flow SHALL group fields into collapsible sections (Window, Geometry, Sun, Sky, Movement, Manual override, Diagnostics) and SHALL reload the entry on save so changes re-apply live. The field set and validation SHALL be driven by a single source (a `VALIDATION_TUPLES` list) with per-field help text from a parallel `DOCS` mapping.
-
-#### Scenario: Editing an option re-applies immediately
-- **WHEN** the user changes a value in the options flow and saves
-- **THEN** the entry SHALL reload and the new value SHALL take effect on the next recompute without a restart
-
-#### Scenario: Every field shows help text
-- **WHEN** the user opens any options section
-- **THEN** each field SHALL display its help text describing the approximate, plain-language meaning of the value
 
 ### Requirement: Window-azimuth compass helper
 

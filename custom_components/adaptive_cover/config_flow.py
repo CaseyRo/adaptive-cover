@@ -1,14 +1,18 @@
 """Config + options flow for Adaptive Cover (CDiT).
 
-Mirrors the adaptive_lighting shape: a single-field create step (name), then a
-sectioned options flow that reloads the entry on save. The field set, defaults
-and help text come from ``const.py`` so there is one source of truth.
+The create step collects the essentials for a working window — name, cover(s),
+facing direction (16-point compass) and an optional ±20° fine-tune — so adding
+the integration works immediately. The sectioned options flow (reloads on save)
+holds everything else, with help text sourced from ``const.py``.
 
-Window azimuth has three ways in, easiest first: a 16-point compass select, a
-numeric field, and an optional two-pin map helper (a pin inside the room + one
-outside through the window → true-north bearing). A literal heading *dial* isn't
-a stock config-flow selector, so two map pins replace the originally-imagined
-"pin + dial" as the map-based exact helper. Precedence: map pins > compass > number.
+Azimuth = (compass[facing] + fine_tune) mod 360, true north. A raw numeric
+azimuth lives in the options Window section and is used when facing is "custom".
+There is no map helper: a compass widget or a map line would need a custom
+frontend element, and compass + fine-tune is both fully native and clearer.
+
+Essentials (covers, azimuth) are seeded into entry ``data`` at create time; the
+options flow writes the full set into ``options``. Readers merge
+``{**DEFAULTS, **data, **options}`` so options override the create-time seed.
 """
 
 from __future__ import annotations
@@ -28,8 +32,6 @@ from homeassistant.data_entry_flow import section
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
-    LocationSelector,
-    LocationSelectorConfig,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
@@ -65,12 +67,11 @@ from .const import (
     DOMAIN,
     SECTIONS,
 )
-from .geometry import bearing
 
 CONF_FACING = "facing"
+CONF_FINETUNE = "finetune"
 FACING_CUSTOM = "custom"
-CONF_INSIDE_POINT = "inside_point"
-CONF_WINDOW_POINT = "window_point"
+FINETUNE_RANGE = 20
 
 # 16-point compass → degrees (true north).
 COMPASS: dict[str, int] = {
@@ -117,6 +118,38 @@ NUMBER_RANGES: dict[str, tuple[float, float, float, str | None]] = {
 }
 
 
+def _resolve_azimuth(facing: str, fine_tune: float, fallback: int) -> int:
+    """Compass + fine-tune → azimuth; fall back to a numeric value if 'custom'."""
+    if facing in COMPASS:
+        return int((COMPASS[facing] + fine_tune) % 360)
+    return int(fallback)
+
+
+def _facing_selector(*, include_custom: bool) -> SelectSelector:
+    options = list(COMPASS.keys())
+    if include_custom:
+        options.append(FACING_CUSTOM)
+    return SelectSelector(
+        SelectSelectorConfig(
+            options=options,
+            mode=SelectSelectorMode.DROPDOWN,
+            translation_key=CONF_FACING,
+        )
+    )
+
+
+def _finetune_selector() -> NumberSelector:
+    return NumberSelector(
+        NumberSelectorConfig(
+            min=-FINETUNE_RANGE,
+            max=FINETUNE_RANGE,
+            step=1,
+            mode=NumberSelectorMode.SLIDER,
+            unit_of_measurement="°",
+        )
+    )
+
+
 def _selector(key: str):
     if key == CONF_COVERS:
         return EntitySelector(EntitySelectorConfig(domain="cover", multiple=True))
@@ -143,25 +176,13 @@ def _marker(key: str, options: dict):
 
 
 def _window_section(options: dict):
-    facing_options = [*COMPASS.keys(), FACING_CUSTOM]
     inner = {
         _marker(CONF_COVERS, options): _selector(CONF_COVERS),
-        vol.Optional(CONF_FACING, default=FACING_CUSTOM): SelectSelector(
-            SelectSelectorConfig(
-                options=facing_options,
-                mode=SelectSelectorMode.DROPDOWN,
-                translation_key=CONF_FACING,
-            )
+        vol.Optional(CONF_FACING, default=FACING_CUSTOM): _facing_selector(
+            include_custom=True
         ),
+        vol.Optional(CONF_FINETUNE, default=0): _finetune_selector(),
         _marker(CONF_AZIMUTH, options): _selector(CONF_AZIMUTH),
-        # Optional "exact" map helper: a pin inside the room + one outside
-        # through the window resolve to a true-north azimuth (overrides above).
-        vol.Optional(CONF_INSIDE_POINT): LocationSelector(
-            LocationSelectorConfig(radius=False)
-        ),
-        vol.Optional(CONF_WINDOW_POINT): LocationSelector(
-            LocationSelectorConfig(radius=False)
-        ),
     }
     return section(vol.Schema(inner), {"collapsed": False})
 
@@ -177,42 +198,29 @@ def _options_schema(options: dict) -> vol.Schema:
     return vol.Schema(schema)
 
 
-def _has_latlon(point: Any) -> bool:
-    return isinstance(point, dict) and "latitude" in point and "longitude" in point
-
-
 def _flatten(user_input: dict[str, Any]) -> dict[str, Any]:
     """Collapse the sectioned form into flat options and resolve the azimuth.
 
-    Azimuth precedence: two map pins (bearing) > compass facing > the numeric
-    field. The helper inputs (facing, map pins) are ephemeral — only the
-    resolved azimuth is stored.
+    The helper inputs (facing, fine-tune) are ephemeral — only the resolved
+    azimuth is stored. Compass+fine-tune wins unless facing is "custom", in
+    which case the numeric azimuth field is used.
     """
     flat: dict[str, Any] = {}
     for value in user_input.values():
         if isinstance(value, dict):
             flat.update(value)
-    inside = flat.pop(CONF_INSIDE_POINT, None)
-    outside = flat.pop(CONF_WINDOW_POINT, None)
     facing = flat.pop(CONF_FACING, FACING_CUSTOM)
-    if _has_latlon(inside) and _has_latlon(outside):
-        flat[CONF_AZIMUTH] = round(
-            bearing(
-                inside["latitude"],
-                inside["longitude"],
-                outside["latitude"],
-                outside["longitude"],
-            )
-        )
-    elif facing != FACING_CUSTOM and facing in COMPASS:
-        flat[CONF_AZIMUTH] = COMPASS[facing]
+    fine_tune = flat.pop(CONF_FINETUNE, 0)
+    flat[CONF_AZIMUTH] = _resolve_azimuth(
+        facing, fine_tune, flat.get(CONF_AZIMUTH, DEFAULTS[CONF_AZIMUTH])
+    )
     for key in ENTITY_OPTIONAL:
         flat.setdefault(key, "")
     return flat
 
 
 class AdaptiveCoverConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Create a window from just a name."""
+    """Create a working window from a short form."""
 
     VERSION = 1
 
@@ -220,11 +228,29 @@ class AdaptiveCoverConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
-            return self.async_create_entry(title=user_input[CONF_NAME], data={})
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema({vol.Required(CONF_NAME): str}),
+            azimuth = _resolve_azimuth(
+                user_input[CONF_FACING],
+                user_input.get(CONF_FINETUNE, 0),
+                DEFAULTS[CONF_AZIMUTH],
+            )
+            return self.async_create_entry(
+                title=user_input[CONF_NAME],
+                data={
+                    CONF_COVERS: user_input[CONF_COVERS],
+                    CONF_AZIMUTH: azimuth,
+                },
+            )
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NAME): str,
+                vol.Required(CONF_COVERS): _selector(CONF_COVERS),
+                vol.Required(CONF_FACING, default="S"): _facing_selector(
+                    include_custom=False
+                ),
+                vol.Optional(CONF_FINETUNE, default=0): _finetune_selector(),
+            }
         )
+        return self.async_show_form(step_id="user", data_schema=schema)
 
     @staticmethod
     @callback
@@ -240,7 +266,11 @@ class OptionsFlowHandler(OptionsFlowWithReload):
     ) -> ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(title="", data=_flatten(user_input))
-        options = {**DEFAULTS, **self.config_entry.options}
+        options = {
+            **DEFAULTS,
+            **self.config_entry.data,
+            **self.config_entry.options,
+        }
         return self.async_show_form(
             step_id="init", data_schema=_options_schema(options)
         )

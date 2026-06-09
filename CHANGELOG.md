@@ -6,6 +6,22 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Changed
+- **Guided setup**: the "Add" step now collects the essentials — name, cover(s),
+  facing direction (16-point compass), and an optional ±20° fine-tune — so a
+  window works immediately instead of asking only for a name. (First field test
+  showed the name-only step read as "is it broken?".)
+- **Azimuth via compass + fine-tune**, replacing the two-pin map helper (which
+  was awkward in practice). `azimuth = (compass + fine_tune) mod 360`; a raw
+  numeric azimuth remains in the options Window section (used when facing is
+  "Custom"). The map helper and `geometry.bearing()` are removed.
+- Essentials are seeded into entry `data` at create time; readers merge
+  `{defaults, data, options}` so options override.
+
+## [0.1.0]
+
 ### Added
 - Initial integration scaffolded after the adaptive_lighting CDiT fork.
 - **Geometry engine** (`geometry.py`) — Model A floor-penetration positioning:

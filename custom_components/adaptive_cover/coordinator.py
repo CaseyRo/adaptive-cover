@@ -72,7 +72,7 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.entry = entry
-        opts = {**DEFAULTS, **entry.options}
+        opts = {**DEFAULTS, **entry.data, **entry.options}
         super().__init__(
             hass,
             _LOGGER,
@@ -89,8 +89,8 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
     @property
     def options(self) -> dict:
-        """Merged defaults + entry options."""
-        return {**DEFAULTS, **self.entry.options}
+        """Merged defaults + create-time data + entry options (options win)."""
+        return {**DEFAULTS, **self.entry.data, **self.entry.options}
 
     def set_threshold(self, key: str, value: float) -> None:
         """Live-update one sky threshold from its number entity."""

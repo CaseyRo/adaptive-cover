@@ -14,7 +14,6 @@ from custom_components.adaptive_cover.geometry import (
     OPEN,
     SunSample,
     angle_in_fov,
-    bearing,
     calculate_position,
     profile_angle,
     sun_window_interval,
@@ -144,14 +143,3 @@ def test_preview_reports_no_sun_for_wrong_azimuth():
     # A window facing due north never sees this southern track.
     interval = sun_window_interval(_track(), 0.0, 45, 45)
     assert interval == (None, None, None)
-
-
-# --- bearing (map azimuth helper) ------------------------------------------
-
-
-def test_bearing_cardinal_directions():
-    # From a base point, a second point due N/E/S/W yields 0/90/180/270.
-    assert bearing(52.0, 5.0, 52.01, 5.0) == pytest.approx(0, abs=1)  # north
-    assert bearing(52.0, 5.0, 52.0, 5.01) == pytest.approx(90, abs=1)  # east
-    assert bearing(52.0, 5.0, 51.99, 5.0) == pytest.approx(180, abs=1)  # south
-    assert bearing(52.0, 5.0, 52.0, 4.99) == pytest.approx(270, abs=1)  # west

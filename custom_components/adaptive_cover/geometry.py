@@ -197,20 +197,3 @@ def sun_window_interval(
         return SunWindowInterval(None, None, None)
     peak = max(in_view, key=lambda s: s.elevation)
     return SunWindowInterval(in_view[0].time, in_view[-1].time, peak.time)
-
-
-def bearing(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Initial true-north bearing in degrees (0-360) from point 1 to point 2.
-
-    Used by the config flow's map helper: drop a pin inside the room (point 1)
-    and one outside through the window (point 2); the bearing from inside to
-    outside is the window's azimuth, in true north (no magnetic declination to
-    correct, unlike a phone compass).
-    """
-    phi1, phi2 = math.radians(lat1), math.radians(lat2)
-    dlon = math.radians(lon2 - lon1)
-    y = math.sin(dlon) * math.cos(phi2)
-    x = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(
-        dlon
-    )
-    return (math.degrees(math.atan2(y, x)) + 360) % 360

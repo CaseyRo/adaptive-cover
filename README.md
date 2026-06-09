@@ -40,10 +40,30 @@ Adaptive Cover positions your blinds automatically to keep direct sun off the ro
 
 It is **not** a drop-in replacement for [`basbruss/adaptive-cover`](https://github.com/basbruss/adaptive-cover) — that's a much broader integration. This one trades breadth for being small, explainable, and forgiving.
 
+## Installation
+
+### HACS — custom repository (recommended)
+
+This integration is distributed as a **HACS custom repository** (it is not in the HACS default list). Adding it is a one-time step:
+
+1. Make sure [HACS](https://hacs.xyz) is installed.
+2. In Home Assistant: **HACS** → top-right **⋮** → **Custom repositories**.
+3. **Repository:** `https://github.com/CaseyRo/adaptive-cover` — **Type:** `Integration` — click **Add**.
+4. Search HACS for **Adaptive Cover (CDiT)**, open it, and click **Download**.
+5. **Restart Home Assistant.**
+6. **Settings → Devices & Services → Add Integration →** search **Adaptive Cover**.
+
+HACS then notifies you of updates like any other integration.
+
+### Manual install
+
+1. Download the latest release, or copy this repo.
+2. Copy `custom_components/adaptive_cover/` into your Home Assistant `config/custom_components/` folder.
+3. **Restart Home Assistant**, then add it via **Settings → Devices & Services → Add Integration → Adaptive Cover**.
+
 ## Quick start
 
-1. **Install via HACS** (custom repository) → restart Home Assistant.
-2. **Settings → Devices & Services → Add Integration → Adaptive Cover.** Fill the short form: a name, the cover(s), and **which way the window faces** — pick the nearest of 16 compass points, then nudge ±20° if it sits between them. That's a working window.
+1. **Install it** (see Installation above), then **Settings → Devices & Services → Add Integration → Adaptive Cover.** Fill the short form: a name, the cover(s), and **which way the window faces** — pick the nearest of 16 compass points, then nudge ±20° if it sits between them. That's a working window.
 3. **Tune later if you want (optional).** Open the entry's **Configure** for the rest — height, glare distance, brightness thresholds, movement, override — all with sane defaults until you touch them.
 4. **Check the preview.** The window's sensor shows *"direct sun enters ~09:40–13:20 today"* — if that looks wrong (e.g. "no direct sun expected" for your sunny south window), your azimuth is off. Fix it now, no waiting for the afternoon.
 5. **Flip the master switch on** when you're happy. Watch the reason sensor for a day before you forget it exists.

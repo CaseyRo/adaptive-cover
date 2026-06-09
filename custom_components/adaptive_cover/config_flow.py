@@ -93,6 +93,25 @@ COMPASS: dict[str, int] = {
     "NNW": 338,
 }
 
+COMPASS_LABELS: dict[str, str] = {
+    "N": "North",
+    "NNE": "North-northeast",
+    "NE": "Northeast",
+    "ENE": "East-northeast",
+    "E": "East",
+    "ESE": "East-southeast",
+    "SE": "Southeast",
+    "SSE": "South-southeast",
+    "S": "South",
+    "SSW": "South-southwest",
+    "SW": "Southwest",
+    "WSW": "West-southwest",
+    "W": "West",
+    "WNW": "West-northwest",
+    "NW": "Northwest",
+    "NNW": "North-northwest",
+}
+
 ENTITY_OPTIONAL = {CONF_BRIGHTNESS_SENSOR, CONF_WEATHER_ENTITY, CONF_INDOOR_LUX_SENSOR}
 
 # key -> (min, max, step, unit)
@@ -126,15 +145,13 @@ def _resolve_azimuth(facing: str, fine_tune: float, fallback: int) -> int:
 
 
 def _facing_selector(*, include_custom: bool) -> SelectSelector:
-    options = list(COMPASS.keys())
+    # Inline value/label options (no translation key) so the uppercase compass
+    # values stay valid — hassfest requires translation keys to be lowercase.
+    options = [{"value": k, "label": COMPASS_LABELS[k]} for k in COMPASS]
     if include_custom:
-        options.append(FACING_CUSTOM)
+        options.append({"value": FACING_CUSTOM, "label": "Custom (use azimuth below)"})
     return SelectSelector(
-        SelectSelectorConfig(
-            options=options,
-            mode=SelectSelectorMode.DROPDOWN,
-            translation_key=CONF_FACING,
-        )
+        SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN)
     )
 
 

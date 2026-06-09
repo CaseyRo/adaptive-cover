@@ -118,29 +118,6 @@
       }
     }
   },
-  "selector": {
-    "facing": {
-      "options": {
-        "N": "North",
-        "NNE": "North-northeast",
-        "NE": "Northeast",
-        "ENE": "East-northeast",
-        "E": "East",
-        "ESE": "East-southeast",
-        "SE": "Southeast",
-        "SSE": "South-southeast",
-        "S": "South",
-        "SSW": "South-southwest",
-        "SW": "Southwest",
-        "WSW": "West-southwest",
-        "W": "West",
-        "WNW": "West-northwest",
-        "NW": "Northwest",
-        "NNW": "North-northwest",
-        "custom": "Custom (use azimuth below)"
-      }
-    }
-  },
   "services": {
     "reset_manual_control": {
       "name": "Reset manual control",

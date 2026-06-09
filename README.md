@@ -64,9 +64,9 @@ HACS then notifies you of updates like any other integration.
 ## Quick start
 
 1. **Install it** (see Installation above), then **Settings → Devices & Services → Add Integration → Adaptive Cover.** Fill the short form: a name, the cover(s), and **which way the window faces** — pick the nearest of 16 compass points, then nudge ±20° if it sits between them. That's a working window.
-3. **Tune later if you want (optional).** Open the entry's **Configure** for the rest — height, glare distance, brightness thresholds, movement, override — all with sane defaults until you touch them.
-4. **Check the preview.** The window's sensor shows *"direct sun enters ~09:40–13:20 today"* — if that looks wrong (e.g. "no direct sun expected" for your sunny south window), your azimuth is off. Fix it now, no waiting for the afternoon.
-5. **Flip the master switch on** when you're happy. Watch the reason sensor for a day before you forget it exists.
+2. **Tune later if you want (optional).** Open the entry's **Configure** for the rest — height, glare distance, brightness thresholds, movement, override — all with sane defaults until you touch them.
+3. **Check the preview.** The window's sensor shows *"direct sun enters ~09:40–13:20 today"* — if that looks wrong (e.g. "no direct sun expected" for your sunny south window), your azimuth is off. Fix it now, no waiting for the afternoon.
+4. **Flip the master switch on** when you're happy. Watch the reason sensor for a day before you forget it exists.
 
 ## The two things people get wrong everywhere else
 

@@ -6,6 +6,26 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0]
+
+### Added
+- **Diagnostic output sensors** (field-test feedback: "the magic worked — now
+  show me *how*"). Each window now exposes standalone, history-graphable
+  entities for the values that explain every decision: profile angle (γ), sun
+  azimuth/elevation, the live sky signal (sky brightness in the source's own
+  unit, or cloud cover %, created only for the configured source), and today's
+  sun enters/leaves/peak as timestamp sensors. All carry the *diagnostic*
+  entity category, mirroring the output-sensor pattern from the CDiT Adaptive
+  Lighting fork.
+- **`binary_sensor.<window>_sun_in_view`** — on while the sun is inside the
+  window's field of view, so history shows exactly when geometry was active.
+
+### Changed
+- The sky signal is now read on **every** recompute (previously only when the
+  geometry wanted to shade), so the sky sensors are meaningful all day. Gating
+  behavior is unchanged; the Status sensor's `sky_signal`/`sky_value`
+  attributes are now populated all day too.
+
 ## [0.2.0]
 
 ### Changed

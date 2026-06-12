@@ -1,9 +1,11 @@
 """Adaptive Cover (CDiT) — sun-tracking covers for Home Assistant.
 
 One config entry per window. Each entry owns a coordinator (the recompute loop)
-and three entities: a master switch (active control + manual-override), a reason
-sensor (the explainable recommendation), and two number entities (the live sky
-thresholds).
+and its entities: a master switch (active control + manual-override), a reason
+sensor (the explainable recommendation), two number entities (the live sky
+thresholds), and a set of diagnostic output sensors (profile angle, sun
+position, sky signal, sun-window times, sun-in-view) that make each value in
+the recommendation graphable in history.
 
 The only "math" lives in ``geometry.py`` and ``sky.py`` and is deliberately free
 of Home Assistant imports so it can be unit-tested in isolation.
@@ -17,7 +19,7 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 from .coordinator import AdaptiveCoverCoordinator
 
-PLATFORMS: list[str] = ["switch", "sensor", "number"]
+PLATFORMS: list[str] = ["switch", "sensor", "binary_sensor", "number"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

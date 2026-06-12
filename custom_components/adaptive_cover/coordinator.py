@@ -199,14 +199,15 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
 
         position = decision.position
         reason = decision.reason
-        sky_kind: str | None = None
-        sky_value: float | None = None
+        # Read the sky on every update — not only when shading is wanted — so
+        # the diagnostic sky sensors are meaningful all day. The gate below
+        # still only influences the position when the geometry wants to shade.
+        sky_kind, sky_value = self._read_sky(opts)
         allow = True
         max_pos = int(opts[CONF_MAX_POSITION])
 
         wants_to_shade = decision.in_fov and position < max_pos
         if wants_to_shade:
-            sky_kind, sky_value = self._read_sky(opts)
             if sky_kind is not None and sky_value is not None:
                 allow, fragment = self._gate.evaluate(sky_value, sky_kind)
                 if not allow:

@@ -84,6 +84,23 @@ HACS then notifies you of updates like any other integration.
 
 Two everyday entities per window — not ten.
 
+### Diagnostic sensors (the "how the magic worked" set)
+
+Every explanatory value is *also* its own entity, so you can graph a day of
+decisions instead of squinting at attributes. They live under **Diagnostic** on
+the device page (hidden from auto-dashboards) and update on every recompute:
+
+| Entity | What it shows |
+|---|---|
+| `… profile angle` | γ, the projected sun angle the geometry actually uses (°). Unknown when geometry didn't run (sun down / out of view). |
+| `… sun azimuth` / `… sun elevation` | The sun position this window computed with (°). |
+| `… sky brightness` *or* `… cloud cover` | The live sky signal — created only for the source you configured, in that source's own unit, and read **all day** (not just when shading is wanted). |
+| `… sun enters` / `… sun leaves` / `… sun peak` | Today's direct-sun window as real timestamps ("in 3 hours"). |
+| `binary_sensor.… sun in view` | On while the sun is inside the window's field of view — the trace of *when* the geometry considered the sun relevant. |
+
+Stack `profile angle` + `sun in view` + the status sensor's position in one
+history graph and the whole day explains itself.
+
 ## Debugging is reading, not guessing
 
 When someone asks *"why is the blind half-down on a sunny day?"*, open the sensor:

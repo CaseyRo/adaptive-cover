@@ -171,3 +171,75 @@ SERVICE_APPLY_NOW: Final = "apply_now"
 # Signal kinds for the sky gate
 SKY_BRIGHTNESS: Final = "brightness"
 SKY_CLOUD: Final = "cloud"
+
+# --- diagnostic output sensors ----------------------------------------------
+# One row per standalone diagnostic sensor (mirrors the OUTPUT_SENSORS table in
+# the CDiT Adaptive Lighting fork). ``attr`` names the AdaptiveCoverData field
+# to read. Rows with ``conditional`` are only created when that config option
+# is set; rows with ``sky_kind`` report unknown unless it is the active signal.
+# ``device_class: "timestamp"`` rows publish datetimes; all others are numeric
+# measurements. Kept HA-import-free on purpose — sensor.py maps the strings.
+DIAGNOSTIC_SENSORS: Final[list[dict[str, object]]] = [
+    {
+        "key": "profile_angle",
+        "name": "Profile angle",
+        "unit": "°",
+        "icon": "mdi:angle-acute",
+        "attr": "profile_angle",
+    },
+    {
+        "key": "sun_azimuth",
+        "name": "Sun azimuth",
+        "unit": "°",
+        "icon": "mdi:sun-compass",
+        "attr": "sun_azimuth",
+    },
+    {
+        "key": "sun_elevation",
+        "name": "Sun elevation",
+        "unit": "°",
+        "icon": "mdi:weather-sunset",
+        "attr": "sun_elevation",
+    },
+    {
+        "key": "sky_brightness",
+        "name": "Sky brightness",
+        # Fallback unit; replaced at setup with the source sensor's own unit
+        # (lux or W/m²) so history statistics stay consistent with the source.
+        "unit": "lx",
+        "icon": "mdi:brightness-5",
+        "attr": "sky_value",
+        "sky_kind": SKY_BRIGHTNESS,
+        "conditional": CONF_BRIGHTNESS_SENSOR,
+    },
+    {
+        "key": "cloud_cover",
+        "name": "Cloud cover",
+        "unit": "%",
+        "icon": "mdi:weather-partly-cloudy",
+        "attr": "sky_value",
+        "sky_kind": SKY_CLOUD,
+        "conditional": CONF_WEATHER_ENTITY,
+    },
+    {
+        "key": "sun_enters",
+        "name": "Sun enters",
+        "icon": "mdi:weather-sunset-up",
+        "attr": "preview_entry",
+        "device_class": "timestamp",
+    },
+    {
+        "key": "sun_leaves",
+        "name": "Sun leaves",
+        "icon": "mdi:weather-sunset-down",
+        "attr": "preview_exit",
+        "device_class": "timestamp",
+    },
+    {
+        "key": "sun_peak",
+        "name": "Sun peak",
+        "icon": "mdi:weather-sunny",
+        "attr": "preview_peak",
+        "device_class": "timestamp",
+    },
+]

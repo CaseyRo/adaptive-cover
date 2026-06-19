@@ -4,9 +4,20 @@ from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResultType
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.adaptive_cover.const import DOMAIN
+from custom_components.adaptive_cover.const import (
+    CONF_FOV_LEFT,
+    CONF_FOV_RIGHT,
+    DOMAIN,
+    SECTIONS,
+)
 
 from .helpers import COVER, set_sun
+
+
+def test_field_of_view_not_in_options_sun_section():
+    # Field of view is tuned live via number entities, not the options flow.
+    assert CONF_FOV_LEFT not in SECTIONS["sun"]
+    assert CONF_FOV_RIGHT not in SECTIONS["sun"]
 
 
 def _options_input(window: dict) -> dict:

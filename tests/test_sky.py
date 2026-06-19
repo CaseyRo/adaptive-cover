@@ -31,6 +31,16 @@ def test_gate_cloud_is_inverted():
     assert gate.evaluate(85, SKY_CLOUD)[0] is False  # cloud 85 → clearness 15 → open
 
 
+def test_gate_reason_uses_sun_strength_wording():
+    # The user-facing axis is "sun strength" (not "clearness"/"level"/"cloud"),
+    # so the reason reads in the same direction as the threshold that was set.
+    gate = SkyGate(shade_above=60, open_below=30)
+    allow, shade_frag = gate.evaluate(70, SKY_BRIGHTNESS)
+    assert allow is True and "sun strength" in shade_frag
+    allow, open_frag = gate.evaluate(85, SKY_CLOUD)
+    assert allow is False and "sun strength" in open_frag
+
+
 def test_governor_trims_when_room_too_bright():
     pos, frag = apply_governor(50, room_lux=3000, cap=2000, is_day=True, min_position=0)
     assert pos < 50

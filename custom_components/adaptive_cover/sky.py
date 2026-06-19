@@ -42,7 +42,6 @@ class SkyGate:
         geometry"; True means "geometry may shade".
         """
         c = clearness(value, kind)
-        unit = "clearness" if kind == SKY_CLOUD else "level"
         if c >= self.shade_above:
             self._shading = True
         elif c <= self.open_below:
@@ -50,8 +49,8 @@ class SkyGate:
         # else: inside the dead-band → hold previous state
 
         if self._shading:
-            return True, f"bright enough ({unit} {c:g} ≥ {self.shade_above:g})"
-        return False, f"not bright enough ({unit} {c:g} ≤ {self.open_below:g})"
+            return True, f"bright enough (sun strength {c:g} ≥ {self.shade_above:g})"
+        return False, f"not bright enough (sun strength {c:g} ≤ {self.open_below:g})"
 
 
 def apply_governor(

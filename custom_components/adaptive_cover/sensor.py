@@ -25,7 +25,12 @@ from homeassistant.const import PERCENTAGE, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_BRIGHTNESS_SENSOR, DIAGNOSTIC_SENSORS, DOMAIN, SKY_BRIGHTNESS
+from .const import (
+    CONF_BRIGHTNESS_SENSOR,
+    CONF_WEATHER_ENTITY,
+    DIAGNOSTIC_SENSORS,
+    DOMAIN,
+)
 from .coordinator import AdaptiveCoverCoordinator
 from .entity import AdaptiveCoverEntity
 
@@ -42,6 +47,9 @@ async def async_setup_entry(
     for row in DIAGNOSTIC_SENSORS:
         conditional = row.get("conditional")
         if conditional and not opts.get(conditional):
+            continue
+        conditional_any = row.get("conditional_any")
+        if conditional_any and not any(opts.get(key) for key in conditional_any):
             continue
         entities.append(AdaptiveCoverDiagnosticSensor(coordinator, row))
     async_add_entities(entities)
@@ -124,15 +132,20 @@ class AdaptiveCoverDiagnosticSensor(AdaptiveCoverEntity, SensorEntity):
     def _resolve_unit(self, description: dict) -> str | None:
         """Resolve the unit once at setup so it never changes at runtime.
 
-        The sky-brightness row inherits the source sensor's own unit (lux or
-        W/m² — the gate is unit-agnostic), falling back to the table default.
+        The Sun strength row inherits the brightness source's own unit (lux or
+        W/m² — the gate is unit-agnostic); with only the weather fallback it is
+        the 0-100 clearness percentage. Falls back to the table default.
         """
         unit = description.get("unit")
-        if description.get("sky_kind") == SKY_BRIGHTNESS:
-            source = self.coordinator.options.get(CONF_BRIGHTNESS_SENSOR)
-            state = self.coordinator.hass.states.get(source) if source else None
-            if state is not None:
-                unit = state.attributes.get("unit_of_measurement") or unit
+        if description.get("key") != "sun_strength":
+            return unit
+        opts = self.coordinator.options
+        source = opts.get(CONF_BRIGHTNESS_SENSOR)
+        state = self.coordinator.hass.states.get(source) if source else None
+        if state is not None:
+            return state.attributes.get("unit_of_measurement") or unit
+        if opts.get(CONF_WEATHER_ENTITY):
+            return PERCENTAGE
         return unit
 
     @property

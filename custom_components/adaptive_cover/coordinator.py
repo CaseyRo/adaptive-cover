@@ -42,7 +42,7 @@ from .const import (
     SKY_CLOUD,
     SUN_ENTITY,
 )
-from .sky import SkyGate, apply_governor
+from .sky import SkyGate, apply_governor, clearness
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,6 +61,7 @@ class AdaptiveCoverData:
     sun_elevation: float | None
     sky_kind: str | None
     sky_value: float | None
+    sun_strength: float | None
     allow_shading: bool
     preview_entry: datetime | None = None
     preview_exit: datetime | None = None
@@ -82,6 +83,10 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         self._gate = SkyGate(
             float(opts[CONF_SHADE_ABOVE]), float(opts[CONF_OPEN_BELOW])
         )
+        # Live overrides for values normally read from options (the field-of-view
+        # number entities push here). The compute consults these over the stored
+        # option each cycle.
+        self._overrides: dict[str, float] = {}
         self._preview_cache_date: object | None = None
         self._preview = geometry.SunWindowInterval(None, None, None)
         # Set by the switch entity so the sensor can surface manual state.
@@ -98,6 +103,21 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self._gate.shade_above = value
         elif key == CONF_OPEN_BELOW:
             self._gate.open_below = value
+
+    def set_override(self, key: str, value: float) -> None:
+        """Live-update a value normally read from options (e.g. field of view).
+
+        Unlike the sky thresholds (which mutate the stateful gate), these are
+        read fresh from options every cycle, so we keep a small override map the
+        compute consults. Changing the field of view also invalidates the cached
+        daily sun-window preview so it recomputes with the new arc.
+        """
+        self._overrides[key] = value
+        self._preview_cache_date = None
+
+    def _eff(self, key: str, opts: dict) -> float:
+        """Effective value: a live override (number entity) over the option."""
+        return float(self._overrides.get(key, opts[key]))
 
     # --- helpers -----------------------------------------------------------
 
@@ -160,8 +180,8 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             self._preview = geometry.sun_window_interval(
                 samples,
                 float(opts[CONF_AZIMUTH]),
-                float(opts[CONF_FOV_LEFT]),
-                float(opts[CONF_FOV_RIGHT]),
+                self._eff(CONF_FOV_LEFT, opts),
+                self._eff(CONF_FOV_RIGHT, opts),
                 float(opts[CONF_MIN_ELEVATION]),
             )
             self._preview_cache_date = today
@@ -189,8 +209,8 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             float(opts[CONF_AZIMUTH]),
             window_height=float(opts[CONF_WINDOW_HEIGHT]),
             glare_distance=float(opts[CONF_GLARE_DISTANCE]),
-            fov_left=float(opts[CONF_FOV_LEFT]),
-            fov_right=float(opts[CONF_FOV_RIGHT]),
+            fov_left=self._eff(CONF_FOV_LEFT, opts),
+            fov_right=self._eff(CONF_FOV_RIGHT, opts),
             min_elevation=float(opts[CONF_MIN_ELEVATION]),
             min_position=int(opts[CONF_MIN_POSITION]),
             max_position=int(opts[CONF_MAX_POSITION]),
@@ -203,6 +223,15 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
         # the diagnostic sky sensors are meaningful all day. The gate below
         # still only influences the position when the geometry wants to shade.
         sky_kind, sky_value = self._read_sky(opts)
+        # "Sun strength" is the axis the gate compares thresholds against (higher
+        # = more direct sun): the raw value for a brightness sensor, 100−cloud%
+        # for the weather fallback. Exposed as a sensor so the dial and the
+        # watched number move the same way.
+        sun_strength = (
+            clearness(sky_value, sky_kind)
+            if sky_kind is not None and sky_value is not None
+            else None
+        )
         allow = True
         max_pos = int(opts[CONF_MAX_POSITION])
 
@@ -239,6 +268,7 @@ class AdaptiveCoverCoordinator(DataUpdateCoordinator[AdaptiveCoverData]):
             sun_elevation=elevation,
             sky_kind=sky_kind,
             sky_value=sky_value,
+            sun_strength=sun_strength,
             allow_shading=allow,
             preview_entry=preview.entry,
             preview_exit=preview.exit,

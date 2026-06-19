@@ -53,16 +53,12 @@
           "sun": {
             "name": "Sun",
             "data": {
-              "fov_left": "Field of view — left (°)",
-              "fov_right": "Field of view — right (°)",
               "min_elevation": "Minimum sun elevation (°)",
               "position_after_sunset": "Position after sunset",
               "min_position": "Minimum position",
               "max_position": "Maximum position"
             },
             "data_description": {
-              "fov_left": "Degrees to the left of centre the window still sees the sun.",
-              "fov_right": "Degrees to the right of centre the window still sees the sun.",
               "min_elevation": "Ignore the sun below this elevation.",
               "position_after_sunset": "Where to leave the cover once the sun is down.",
               "min_position": "Never close past this position.",
@@ -82,8 +78,8 @@
             "data_description": {
               "brightness_sensor": "Optional outdoor light/irradiance sensor (lux or W/m²). Preferred over cloud cover.",
               "weather_entity": "Optional; its cloud-cover % is used only when no brightness sensor is set.",
-              "shade_above": "Shade when clearness rises to/above this (sensor's own scale, or clearness%=100-cloud).",
-              "open_below": "Open back up below this. Keep it under 'shade above' — the gap is an anti-flap dead-band.",
+              "shade_above": "Shade once 'sun strength' reaches this. Watch the Sun strength sensor — higher = more direct sun (weather path = 100−cloud%).",
+              "open_below": "Open back up once 'sun strength' falls to this. Keep it under 'shade above' — the gap is an anti-flap dead-band.",
               "indoor_lux_sensor": "Optional room sensor used as a gentle comfort governor. Empty = disabled.",
               "indoor_lux_cap": "Room brightness above which to trim more closed (0 = off)."
             }

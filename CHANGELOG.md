@@ -6,6 +6,28 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0]
+
+### Changed
+- **Sky thresholds now read on a single "sun strength" axis** (field-test
+  feedback: "open below / shade above felt like the opposite of the cloud-cover
+  sensor"). The gate always compares a *sun strength* value where higher = more
+  direct sun. A new **`sensor.<window>_sun_strength`** publishes exactly that
+  value — the raw reading on the brightness path, `100 − cloud%` on the weather
+  path — so the number you watch moves the same direction as the `Shade above` /
+  `Open below` thresholds you set. The threshold help text and the Status
+  sensor's reason text now speak in *sun strength* too.
+- **Field of view (left/right) is now tuned live via number entities**
+  (`number.<window>_field_of_view_left` / `_right`, `0–90°`), not the options
+  flow — so you can narrow one side (e.g. a neighbour's house blocks that arc)
+  from a dashboard and watch the effect. Values restore across restarts and
+  seed from any previously configured option, so existing windows are unchanged.
+
+### Removed
+- The raw **`sensor.<window>_sky_brightness`** sensor is replaced by
+  `sensor.<window>_sun_strength` (identical value on the brightness path; the
+  raw **Cloud cover** sensor remains as weather telemetry).
+
 ## [0.3.0]
 
 ### Added

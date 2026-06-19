@@ -110,11 +110,12 @@ DOCS: Final[dict[str, str]] = {
         "brightness sensor is set."
     ),
     CONF_SHADE_ABOVE: (
-        "Shade when clearness rises to/above this (in the active signal's own "
-        "scale — lux/irradiance, or clearness%=100-cloud for the weather fallback)."
+        "Shade once 'sun strength' reaches this. Watch the Sun strength sensor — "
+        "higher = more direct sun (with a weather entity it's 100−cloud%, so it "
+        "rises as skies clear). Set in the active signal's own scale."
     ),
     CONF_OPEN_BELOW: (
-        "Open back up when clearness falls to/below this. Keep it below 'shade "
+        "Open back up once 'sun strength' falls to this. Keep it below 'shade "
         "above' — the gap is a dead-band so passing clouds can't make the blind flap."
     ),
     CONF_INDOOR_LUX_SENSOR: (
@@ -141,9 +142,8 @@ DOCS: Final[dict[str, str]] = {
 SECTIONS: Final[dict[str, list[str]]] = {
     "window": [CONF_COVERS, CONF_AZIMUTH],
     "geometry": [CONF_WINDOW_HEIGHT, CONF_GLARE_DISTANCE],
+    # Field of view (left/right) is tuned live via number entities, not here.
     "sun": [
-        CONF_FOV_LEFT,
-        CONF_FOV_RIGHT,
         CONF_MIN_ELEVATION,
         CONF_POSITION_AFTER_SUNSET,
         CONF_MIN_POSITION,
@@ -175,7 +175,8 @@ SKY_CLOUD: Final = "cloud"
 # --- diagnostic output sensors ----------------------------------------------
 # One row per standalone diagnostic sensor (mirrors the OUTPUT_SENSORS table in
 # the CDiT Adaptive Lighting fork). ``attr`` names the AdaptiveCoverData field
-# to read. Rows with ``conditional`` are only created when that config option
+# to read. Rows with ``conditional`` are only created when that config option is
+# set; rows with ``conditional_any`` are created when *any* of the listed options
 # is set; rows with ``sky_kind`` report unknown unless it is the active signal.
 # ``device_class: "timestamp"`` rows publish datetimes; all others are numeric
 # measurements. Kept HA-import-free on purpose — sensor.py maps the strings.
@@ -202,15 +203,17 @@ DIAGNOSTIC_SENSORS: Final[list[dict[str, object]]] = [
         "attr": "sun_elevation",
     },
     {
-        "key": "sky_brightness",
-        "name": "Sky brightness",
-        # Fallback unit; replaced at setup with the source sensor's own unit
-        # (lux or W/m²) so history statistics stay consistent with the source.
-        "unit": "lx",
-        "icon": "mdi:brightness-5",
-        "attr": "sky_value",
-        "sky_kind": SKY_BRIGHTNESS,
-        "conditional": CONF_BRIGHTNESS_SENSOR,
+        "key": "sun_strength",
+        "name": "Sun strength",
+        # The axis the sky gate compares its thresholds against (higher = more
+        # direct sun): the raw value on the brightness path, 100−cloud% on the
+        # weather path. Unit resolved at setup — the brightness sensor's own unit
+        # (lux or W/m²), or % for the 0-100 clearness of the cloud fallback — so
+        # the dial and the watched number always move the same direction.
+        "unit": None,
+        "icon": "mdi:white-balance-sunny",
+        "attr": "sun_strength",
+        "conditional_any": [CONF_BRIGHTNESS_SENSOR, CONF_WEATHER_ENTITY],
     },
     {
         "key": "cloud_cover",

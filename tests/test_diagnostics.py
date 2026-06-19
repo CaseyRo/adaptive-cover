@@ -16,7 +16,7 @@ PROFILE = "sensor.living_room_profile_angle"
 AZIMUTH = "sensor.living_room_sun_azimuth"
 ELEVATION = "sensor.living_room_sun_elevation"
 CLOUD = "sensor.living_room_cloud_cover"
-BRIGHTNESS = "sensor.living_room_sky_brightness"
+SUN_STRENGTH = "sensor.living_room_sun_strength"
 SUN_IN_VIEW = "binary_sensor.living_room_sun_in_view"
 
 
@@ -51,7 +51,8 @@ async def test_uncomputed_values_read_unknown_after_sunset(hass):
 async def test_sky_sensors_absent_without_a_source(hass):
     await make_window(hass)
     assert hass.states.get(CLOUD) is None
-    assert hass.states.get(BRIGHTNESS) is None
+    # Sun strength is created only when some sky signal is configured.
+    assert hass.states.get(SUN_STRENGTH) is None
 
 
 async def test_cloud_cover_reads_all_day_without_changing_position(hass):
@@ -66,14 +67,15 @@ async def test_cloud_cover_reads_all_day_without_changing_position(hass):
     )
 
     assert float(hass.states.get(CLOUD).state) == pytest.approx(72.0)
+    # Sun strength is the gate's axis: 100 − cloud%, moving the same direction
+    # as the thresholds (cloud 72 → sun strength 28).
+    assert float(hass.states.get(SUN_STRENGTH).state) == pytest.approx(28.0)
     status = hass.states.get("sensor.living_room_status")
     assert status.state == "100"  # gating did not kick in
     assert status.attributes["reason"] == "open — not in field of view"
-    # Brightness sensor not configured → that entity must not exist.
-    assert hass.states.get(BRIGHTNESS) is None
 
 
-async def test_sky_brightness_inherits_source_unit(hass):
+async def test_sun_strength_inherits_source_unit(hass):
     hass.states.async_set(
         "sensor.outdoor_irradiance", "350", {"unit_of_measurement": "W/m²"}
     )
@@ -82,7 +84,8 @@ async def test_sky_brightness_inherits_source_unit(hass):
         options={"brightness_sensor": "sensor.outdoor_irradiance"},
     )
 
-    state = hass.states.get(BRIGHTNESS)
+    # On the brightness path sun strength == the raw value, in the source unit.
+    state = hass.states.get(SUN_STRENGTH)
     assert state is not None
     assert state.attributes["unit_of_measurement"] == "W/m²"
     assert float(state.state) == pytest.approx(350.0)

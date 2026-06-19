@@ -1,10 +1,15 @@
-"""The two live-tunable sky thresholds.
+"""The live-tunable values exposed as number entities.
 
-Per the design decision, these are the *only* settings exposed as number
-entities — the genuinely subjective "tune while watching" values. Calibrating
-the cloud/brightness response is a slider you drag on a dashboard, not a trip
-back through the options flow. Values restore across restarts and take effect on
-the next recompute.
+Per the design decision, the values you tune *while watching the cover* are
+sliders on a dashboard, not a trip back through the options flow:
+
+* the two sky thresholds (shade-above / open-below), pushed into the stateful
+  sky gate, and
+* the left/right field-of-view spans — narrow one side when a neighbouring
+  structure blocks that arc — pushed into the coordinator's live-override map.
+
+All restore across restarts (falling back to the configured option, then the
+default) and take effect on the next recompute.
 """
 
 from __future__ import annotations
@@ -15,6 +20,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
+    CONF_FOV_LEFT,
+    CONF_FOV_RIGHT,
     CONF_OPEN_BELOW,
     CONF_SHADE_ABOVE,
     DOMAIN,
@@ -22,8 +29,8 @@ from .const import (
 from .coordinator import AdaptiveCoverCoordinator
 from .entity import AdaptiveCoverEntity
 
-# Generous upper bound so the same entity works for clearness% and raw lux alike
-# (unit-agnostic: you set it in the active sensor's own scale).
+# Generous upper bound so the same threshold entity works for clearness% and raw
+# lux alike (unit-agnostic: you set it in the active sensor's own scale).
 MAX_THRESHOLD = 200000.0
 
 
@@ -32,24 +39,26 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the shade/open threshold numbers."""
+    """Set up the live-tunable threshold and field-of-view numbers."""
     coordinator: AdaptiveCoverCoordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
         [
             AdaptiveCoverThreshold(coordinator, CONF_SHADE_ABOVE, "Shade above"),
             AdaptiveCoverThreshold(coordinator, CONF_OPEN_BELOW, "Open below"),
+            AdaptiveCoverFov(coordinator, CONF_FOV_LEFT, "Field of view — left"),
+            AdaptiveCoverFov(coordinator, CONF_FOV_RIGHT, "Field of view — right"),
         ]
     )
 
 
-class AdaptiveCoverThreshold(AdaptiveCoverEntity, RestoreNumber):
-    """A single live-tunable sky threshold pushed into the coordinator's gate."""
+class AdaptiveCoverLiveNumber(AdaptiveCoverEntity, RestoreNumber):
+    """A live-tunable value: restores across restarts, pushed into the coordinator.
 
-    _attr_native_min_value = 0.0
-    _attr_native_max_value = MAX_THRESHOLD
-    _attr_native_step = 1.0
+    On first run a control seeds from its configured option; thereafter it
+    restores its last value. Subclasses say where the value goes via ``_push``.
+    """
+
     _attr_mode = NumberMode.BOX
-    _attr_icon = "mdi:weather-partly-cloudy"
 
     def __init__(
         self, coordinator: AdaptiveCoverCoordinator, key: str, name: str
@@ -65,10 +74,38 @@ class AdaptiveCoverThreshold(AdaptiveCoverEntity, RestoreNumber):
         last = await self.async_get_last_number_data()
         if last is not None and last.native_value is not None:
             self._attr_native_value = last.native_value
-        self.coordinator.set_threshold(self._key, self._attr_native_value)
+        self._push(self._attr_native_value)
 
     async def async_set_native_value(self, value: float) -> None:
         self._attr_native_value = value
-        self.coordinator.set_threshold(self._key, value)
+        self._push(value)
         self.async_write_ha_state()
         await self.coordinator.async_request_refresh()
+
+    def _push(self, value: float) -> None:
+        raise NotImplementedError
+
+
+class AdaptiveCoverThreshold(AdaptiveCoverLiveNumber):
+    """A live sky threshold pushed into the coordinator's stateful gate."""
+
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = MAX_THRESHOLD
+    _attr_native_step = 1.0
+    _attr_icon = "mdi:weather-partly-cloudy"
+
+    def _push(self, value: float) -> None:
+        self.coordinator.set_threshold(self._key, value)
+
+
+class AdaptiveCoverFov(AdaptiveCoverLiveNumber):
+    """A live field-of-view span pushed into the coordinator's override map."""
+
+    _attr_native_min_value = 0.0
+    _attr_native_max_value = 90.0
+    _attr_native_step = 1.0
+    _attr_native_unit_of_measurement = "°"
+    _attr_icon = "mdi:angle-acute"
+
+    def _push(self, value: float) -> None:
+        self.coordinator.set_override(self._key, value)

@@ -18,9 +18,13 @@ Each window SHALL expose a sensor whose state is the recommended cover position 
 - **WHEN** the system leaves a window open because the sun-strength value is below the shade threshold
 - **THEN** the `reason` attribute SHALL name the cause and the sun-strength value compared (e.g. "open — not bright enough, sun strength 28 ≤ open-below 30")
 
-### Requirement: Sun-strength diagnostic sensor
+### Requirement: Sun-strength sensor
 
-Each window SHALL expose a **Sun strength** diagnostic sensor whose value is exactly the value the sky gate compares its thresholds against: the raw outdoor-brightness value on the brightness path, or `100 − cloud%` on the weather cloud-cover path. The sensor SHALL be created whenever any sky signal source (a brightness sensor or a weather entity) is configured, and SHALL NOT be created when none is. When the configured source is momentarily unavailable, the sensor SHALL report unknown rather than a stale value. Its unit SHALL be fixed per entity at setup (the source sensor's own unit on the brightness path; `%` on the cloud path). It SHALL carry the diagnostic entity category and update on every recompute. This sensor SHALL replace the former raw `Sky brightness` sensor (which reported the same value on the brightness path); the raw **Cloud cover** sensor SHALL remain as weather telemetry.
+Each window SHALL expose a **Sun strength** sensor whose value is exactly the value the sky gate compares its thresholds against: the raw outdoor-brightness value on the brightness path, or `100 − cloud%` on the weather cloud-cover path. The sensor SHALL be created whenever any sky signal source (a brightness sensor or a weather entity) is configured, and SHALL NOT be created when none is. When the configured source is momentarily unavailable, the sensor SHALL report unknown rather than a stale value. Its unit SHALL be fixed per entity at setup (the source sensor's own unit on the brightness path; `%` on the cloud path). Because it is the axis the cover acts on and the value the user tunes against, it SHALL be a primary sensor (no diagnostic entity category) surfaced alongside the Status sensor rather than grouped with the diagnostic telemetry, and SHALL update on every recompute. This sensor SHALL replace the former raw `Sky brightness` sensor (which reported the same value on the brightness path); the raw **Cloud cover** sensor SHALL remain as weather telemetry.
+
+#### Scenario: Sun strength is a primary sensor, not diagnostic
+- **WHEN** a window with a configured sky source is set up
+- **THEN** the Sun strength sensor SHALL carry no diagnostic entity category, so it appears with the primary sensors rather than in the diagnostic group
 
 #### Scenario: Sun strength rises as skies clear (cloud path)
 - **WHEN** a weather entity is the active sky signal and its cloud coverage falls from 70% to 20%

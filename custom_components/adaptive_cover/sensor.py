@@ -105,20 +105,22 @@ class AdaptiveCoverSensor(AdaptiveCoverEntity, SensorEntity):
 
 
 class AdaptiveCoverDiagnosticSensor(AdaptiveCoverEntity, SensorEntity):
-    """One read-only diagnostic value from the coordinator's last recompute.
+    """One read-only value from the coordinator's last recompute.
 
     Reports ``unknown`` (None) whenever the underlying value was not computed —
     e.g. the profile angle after sunset, or a sky row that is not the active
-    signal. Stale numbers would lie about how the decision was made.
+    signal. Stale numbers would lie about how the decision was made. Most rows
+    are diagnostic telemetry; ``primary`` rows (Sun strength — the axis the
+    cover acts on) are surfaced as normal sensors instead.
     """
-
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self, coordinator: AdaptiveCoverCoordinator, description: dict
     ) -> None:
         super().__init__(coordinator)
         self._row = description
+        if not description.get("primary"):
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_unique_id = f"{self._entry.entry_id}_{description['key']}"
         self._attr_name = description["name"]
         self._attr_icon = description["icon"]

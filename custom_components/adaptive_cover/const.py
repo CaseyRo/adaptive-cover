@@ -178,6 +178,7 @@ SKY_CLOUD: Final = "cloud"
 # to read. Rows with ``conditional`` are only created when that config option is
 # set; rows with ``conditional_any`` are created when *any* of the listed options
 # is set; rows with ``sky_kind`` report unknown unless it is the active signal.
+# Rows with ``primary`` are surfaced as normal sensors (no diagnostic category).
 # ``device_class: "timestamp"`` rows publish datetimes; all others are numeric
 # measurements. Kept HA-import-free on purpose — sensor.py maps the strings.
 DIAGNOSTIC_SENSORS: Final[list[dict[str, object]]] = [
@@ -205,6 +206,10 @@ DIAGNOSTIC_SENSORS: Final[list[dict[str, object]]] = [
     {
         "key": "sun_strength",
         "name": "Sun strength",
+        # The axis the cover acts on, and what the thresholds compare against —
+        # so it's a primary sensor (surfaced with Status), not buried under
+        # Diagnostic with the "how the magic worked" telemetry.
+        "primary": True,
         # The axis the sky gate compares its thresholds against (higher = more
         # direct sun): the raw value on the brightness path, 100−cloud% on the
         # weather path. Unit resolved at setup — the brightness sensor's own unit

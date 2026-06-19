@@ -6,6 +6,23 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.1]
+
+### Changed
+- **Named everything around "sun strength"** (field-test feedback: the controls
+  read clearer once they say what the cover actually acts on). The two threshold
+  controls are now **`Sun strength — shade above`** / **`Sun strength — open
+  below`** (matching the `Field of view — left/right` style), in the device
+  controls and the options dialog.
+- **`Sun strength` is now a primary sensor**, surfaced with Status instead of
+  buried in the Diagnostic group — it's the axis the cover responds to and the
+  value you tune against, so it belongs up front. The "how the magic worked"
+  telemetry (profile angle, sun azimuth/elevation, preview times) stays
+  diagnostic.
+
+No behaviour or value changes — thresholds keep their meaning; this is naming
+and prominence only.
+
 ## [0.4.0]
 
 ### Changed

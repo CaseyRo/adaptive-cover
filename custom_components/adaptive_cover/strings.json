@@ -70,8 +70,8 @@
             "data": {
               "brightness_sensor": "Outdoor brightness sensor",
               "weather_entity": "Weather entity (cloud fallback)",
-              "shade_above": "Shade above",
-              "open_below": "Open below",
+              "shade_above": "Sun strength — shade above",
+              "open_below": "Sun strength — open below",
               "indoor_lux_sensor": "Indoor light sensor (governor)",
               "indoor_lux_cap": "Indoor brightness cap"
             },

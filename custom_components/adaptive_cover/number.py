@@ -43,8 +43,12 @@ async def async_setup_entry(
     coordinator: AdaptiveCoverCoordinator = hass.data[DOMAIN][entry.entry_id]
     async_add_entities(
         [
-            AdaptiveCoverThreshold(coordinator, CONF_SHADE_ABOVE, "Shade above"),
-            AdaptiveCoverThreshold(coordinator, CONF_OPEN_BELOW, "Open below"),
+            AdaptiveCoverThreshold(
+                coordinator, CONF_SHADE_ABOVE, "Sun strength — shade above"
+            ),
+            AdaptiveCoverThreshold(
+                coordinator, CONF_OPEN_BELOW, "Sun strength — open below"
+            ),
             AdaptiveCoverFov(coordinator, CONF_FOV_LEFT, "Field of view — left"),
             AdaptiveCoverFov(coordinator, CONF_FOV_RIGHT, "Field of view — right"),
         ]

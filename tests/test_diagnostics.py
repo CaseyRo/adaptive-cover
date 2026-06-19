@@ -7,6 +7,8 @@ going stale.
 """
 
 import pytest
+from homeassistant.const import EntityCategory
+from homeassistant.helpers import entity_registry as er
 
 from custom_components.adaptive_cover.geometry import profile_angle
 
@@ -89,6 +91,18 @@ async def test_sun_strength_inherits_source_unit(hass):
     assert state is not None
     assert state.attributes["unit_of_measurement"] == "W/m²"
     assert float(state.state) == pytest.approx(350.0)
+
+
+async def test_sun_strength_is_primary_not_diagnostic(hass):
+    # Sun strength is the axis the cover acts on, so it's a primary sensor;
+    # the "how the magic worked" telemetry stays in the diagnostic group.
+    hass.states.async_set("weather.home", "cloudy", {"cloud_coverage": 50})
+    await make_window(hass, options={"weather_entity": "weather.home"})
+
+    registry = er.async_get(hass)
+    sun = registry.async_get(SUN_STRENGTH)
+    assert sun is not None and sun.entity_category is None
+    assert registry.async_get(PROFILE).entity_category == EntityCategory.DIAGNOSTIC
 
 
 async def test_sun_in_view_follows_the_sun(hass):

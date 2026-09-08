@@ -11,7 +11,7 @@ import pytest
 from .helpers import make_window
 
 SUN_IN_VIEW = "binary_sensor.living_room_sun_in_view"
-STATUS = "sensor.living_room_status"
+STATUS = "sensor.living_room_recommended_position"
 
 
 def _fov_ids(hass) -> tuple[str, str]:

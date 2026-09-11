@@ -2,11 +2,25 @@
 
 **Sun-tracking blinds for Home Assistant that you can actually set up in a minute — and debug at a glance.**
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![Version](https://img.shields.io/github/v/release/CaseyRo/adaptive-cover?include_prereleases&style=for-the-badge)](https://github.com/CaseyRo/adaptive-cover/releases)
+
 Adaptive Cover positions your blinds automatically to keep direct sun off the room: it reads the sun from Home Assistant, works out where the light is falling, and moves the cover just enough to hold the sunlight back. When the sun moves on, the blind opens back up. It feels like magic — and unlike most adaptive-cover setups, it tells you *why* it did what it did, and it never fights you when you move the blind yourself.
 
 > **Philosophy:** one input that needs thought (which way the window faces), sane defaults for everything else, a plain-language reason for every decision, and a blind that always yields to the human holding it. Built by the same hands as our [Adaptive Lighting (CDiT) fork](https://github.com/CaseyRo/adaptive-lighting), and deliberately opinionated for a single household.
 
 ---
+
+## Requirements
+
+- **Home Assistant 2025.1.0 or newer** (declared in `hacs.json`; older versions
+  will fail to load the integration rather than warn).
+- A cover entity that supports `set_cover_position`. Open/close-only covers
+  cannot be positioned and are not supported.
+- Optional: an outdoor illuminance sensor, if you want the blind to stand down
+  on overcast days.
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed between releases.
 
 ## What it does
 

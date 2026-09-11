@@ -72,7 +72,7 @@ async def test_cloud_cover_reads_all_day_without_changing_position(hass):
     # Sun strength is the gate's axis: 100 − cloud%, moving the same direction
     # as the thresholds (cloud 72 → sun strength 28).
     assert float(hass.states.get(SUN_STRENGTH).state) == pytest.approx(28.0)
-    status = hass.states.get("sensor.living_room_status")
+    status = hass.states.get("sensor.living_room_recommended_position")
     assert status.state == "100"  # gating did not kick in
     assert status.attributes["reason"] == "open — not in field of view"
 

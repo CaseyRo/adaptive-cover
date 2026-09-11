@@ -4,9 +4,11 @@ on:
   push:
     branches: [main]
   pull_request:
-  schedule:
-    - cron: "0 0 * * *"
   workflow_dispatch:
+  # No schedule: GitHub auto-disables any workflow containing one after
+  # 60 days of repository inactivity — and a disabled workflow stops
+  # answering push and pull_request too. That is what took this one out
+  # on 2026-08-19; nothing had validated the repo since.
 
 jobs:
   hacs:

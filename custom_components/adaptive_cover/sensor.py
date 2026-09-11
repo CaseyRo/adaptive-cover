@@ -62,7 +62,7 @@ def _iso(value) -> str | None:
 class AdaptiveCoverSensor(AdaptiveCoverEntity, SensorEntity):
     """Publishes the recommended position and a readable reason."""
 
-    _attr_name = "Status"
+    _attr_name = "Recommended position"
     _attr_icon = "mdi:blinds"
     _attr_native_unit_of_measurement = PERCENTAGE
 

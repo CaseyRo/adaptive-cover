@@ -6,6 +6,12 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **The main sensor is named `Recommended position`** (was `Status`): its state
+  is the position the integration recommends for the cover, and the name now
+  says so. Existing installs keep their entity IDs; only the display name
+  changes. New installs get `sensor.<window>_recommended_position`.
+
 ## [0.4.1]
 
 ### Changed

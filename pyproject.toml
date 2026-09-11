@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Sun-tracking (adaptive) covers for Home Assistant — simple, explainable, WAF-safe"
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 
 [dependency-groups]
 dev = [
@@ -30,7 +30,7 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true

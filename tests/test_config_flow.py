@@ -54,7 +54,7 @@ async def test_create_step_yields_working_entry(hass):
     assert entry.data["azimuth"] == 188  # South (180) + fine-tune (+8)
 
     # The create-time data must reach the engine via the defaults/data/options merge.
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     assert coordinator.options["covers"] == [COVER]
     assert coordinator.options["azimuth"] == 188
     assert coordinator.data is not None
@@ -105,7 +105,7 @@ async def test_options_reload_applies_new_value(hass):
     await hass.async_block_till_done()
 
     # OptionsFlowWithReload recreated the entry → fresh coordinator sees azimuth 90.
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     assert coordinator.options["azimuth"] == 90
 
 
@@ -142,7 +142,7 @@ async def test_defaults_produce_working_behaviour(hass):
     await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
     assert coordinator.data is not None
     assert 0 <= coordinator.data.position <= 100
     assert isinstance(coordinator.data.reason, str)

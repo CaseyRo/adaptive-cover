@@ -13,8 +13,9 @@ Adaptive Cover positions your blinds automatically to keep direct sun off the ro
 
 ## Requirements
 
-- **Home Assistant 2025.1.0 or newer** (declared in `hacs.json`; older versions
-  will fail to load the integration rather than warn).
+- **Home Assistant 2025.8.0 or newer** (declared in `hacs.json`; the options
+  flow uses `OptionsFlowWithReload`, added in 2025.8, so older versions fail to
+  load the integration rather than warn).
 - A cover entity that supports `set_cover_position`. Open/close-only covers
   cannot be positioned and are not supported.
 - Optional: an outdoor illuminance sensor, if you want the blind to stand down
@@ -94,7 +95,7 @@ HACS then notifies you of updates like any other integration.
 |---|---|
 | `switch.adaptive_cover_<window>` | Master on/off. On = it drives the blind. Off = it just *shows* what it would do. |
 | `sensor.adaptive_cover_<window>` | The brain, readable: position + `reason`, sun angles, the active sky signal, manual status, and today's sun-entry preview. |
-| `number.*` (a few) | Live-tunable brightness thresholds, so calibrating is a slider, not a re-setup. |
+| `number.*` (four) | Live tuning, so calibrating is a slider, not a re-setup: *Sun strength — shade above* / *open below* (the sky-signal thresholds, in the active sensor's own scale) and *Field of view — left* / *right*. |
 
 Two everyday entities per window — not ten.
 

@@ -25,3 +25,7 @@ config/*
 .DS_Store
 .idea/
 .vscode/
+
+# OpenSpec CLI copies are managed at user scope, not per repo
+.claude/commands/opsx/
+.claude/skills/openspec-*/

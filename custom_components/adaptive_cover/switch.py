@@ -66,12 +66,12 @@ def _quantize(value: int, step: int) -> int:
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistant,  # noqa: ARG001 - platform signature
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the master switch and register entity services."""
-    coordinator: AdaptiveCoverCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: AdaptiveCoverCoordinator = entry.runtime_data
     switch = AdaptiveCoverSwitch(coordinator)
     async_add_entities([switch])
 

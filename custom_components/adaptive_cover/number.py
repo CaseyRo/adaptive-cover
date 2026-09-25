@@ -24,7 +24,6 @@ from .const import (
     CONF_FOV_RIGHT,
     CONF_OPEN_BELOW,
     CONF_SHADE_ABOVE,
-    DOMAIN,
 )
 from .coordinator import AdaptiveCoverCoordinator
 from .entity import AdaptiveCoverEntity
@@ -35,12 +34,12 @@ MAX_THRESHOLD = 200000.0
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistant,  # noqa: ARG001 - platform signature
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the live-tunable threshold and field-of-view numbers."""
-    coordinator: AdaptiveCoverCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: AdaptiveCoverCoordinator = entry.runtime_data
     async_add_entities(
         [
             AdaptiveCoverThreshold(

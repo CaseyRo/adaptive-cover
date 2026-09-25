@@ -29,19 +29,18 @@ from .const import (
     CONF_BRIGHTNESS_SENSOR,
     CONF_WEATHER_ENTITY,
     DIAGNOSTIC_SENSORS,
-    DOMAIN,
 )
 from .coordinator import AdaptiveCoverCoordinator
 from .entity import AdaptiveCoverEntity
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistant,  # noqa: ARG001 - platform signature
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the reason sensor and the diagnostic output sensors."""
-    coordinator: AdaptiveCoverCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: AdaptiveCoverCoordinator = entry.runtime_data
     opts = coordinator.options
     entities: list[SensorEntity] = [AdaptiveCoverSensor(coordinator)]
     for row in DIAGNOSTIC_SENSORS:

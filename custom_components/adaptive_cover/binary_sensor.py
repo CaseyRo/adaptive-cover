@@ -14,18 +14,17 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
 from .coordinator import AdaptiveCoverCoordinator
 from .entity import AdaptiveCoverEntity
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
+    hass: HomeAssistant,  # noqa: ARG001 - platform signature
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sun-in-view binary sensor."""
-    coordinator: AdaptiveCoverCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: AdaptiveCoverCoordinator = entry.runtime_data
     async_add_entities([AdaptiveCoverSunInViewSensor(coordinator)])
 
 
